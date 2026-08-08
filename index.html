@@ -117,24 +117,62 @@ section{padding:52px 0 4px}
 .splitbar{display:flex;height:10px;border-radius:999px;overflow:hidden;margin-top:18px;background:var(--line-soft)}
 .splitbar i{display:block;height:100%}
 
-/* project cards */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.pcard{padding:0;overflow:hidden;display:flex;flex-direction:column}
-.pcard .accent{height:4px}
-.pcard .body{padding:20px;display:flex;flex-direction:column;gap:12px;flex:1}
-.pcard .head{display:flex;gap:11px;align-items:flex-start}
-.pcard .idx{
-  font-family:var(--mono);font-weight:600;font-size:12.5px;flex:0 0 24px;height:24px;border-radius:50%;
-  display:grid;place-items:center;color:#fff;margin-top:1px
+/* project cards — การ์ดอันดับ 3 คอลัมน์ (วงแหวน · เนื้อหา · ตัวเลขใหญ่) */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.pcard{
+  display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:start;gap:14px;
+  padding:16px 18px 15px;border-radius:14px;
+  transition:box-shadow .14s ease,transform .14s ease,border-color .14s ease
 }
-.pcard .name{font-family:var(--display);font-weight:600;font-size:15.5px;line-height:1.32;color:var(--ink)}
-.pcard .desc{font-size:12.8px;color:var(--muted);line-height:1.55}
-.pcard .figs{display:flex;align-items:baseline;gap:9px;margin-top:auto;padding-top:4px}
-.pcard .act{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1;color:var(--ink)}
-.pcard .tgt{font-size:12.5px;color:var(--muted)}
-.pbar{height:7px;border-radius:999px;background:var(--paper-2);overflow:hidden}
+.pcard:hover{border-color:#D9CFB8;box-shadow:0 8px 20px rgba(18,58,99,.09);transform:translateY(-1px)}
+
+/* ซ้าย: วงแหวน % พร้อมเลขโครงการลอยมุม */
+.pc-left{position:relative;min-width:72px;padding-top:3px}
+.pc-idx{
+  position:absolute;top:-4px;left:-4px;z-index:2;width:23px;height:23px;border-radius:999px;
+  display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:11.5px;
+  color:#fff;border:2px solid var(--surface);box-shadow:0 2px 6px rgba(18,58,99,.16)
+}
+.pc-ring{
+  width:68px;height:68px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--pct) * 1%),var(--paper-2) 0)
+}
+.pc-ring.none{background:var(--paper-2)}
+.pc-ring-in{
+  width:52px;height:52px;border-radius:50%;background:var(--surface);display:grid;place-items:center;
+  font-family:var(--mono);font-weight:600;font-size:13px;color:var(--ink)
+}
+.pc-ring.none .pc-ring-in{color:var(--muted)}
+
+/* กลาง */
+.pc-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pc-name{
+  font-family:var(--display);font-weight:600;font-size:14.5px;line-height:1.3;color:var(--ink);margin:0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em
+}
+.pc-desc{
+  font-size:12.2px;color:var(--muted);line-height:1.45;margin:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.pc-meta{
+  font-family:var(--mono);font-size:11.8px;font-weight:500;color:#5E6A75;margin:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.pbar{position:relative;height:8px;border-radius:999px;background:var(--paper-2);margin-top:2px}
 .pbar i{display:block;height:100%;width:0;border-radius:999px;transition:width .9s cubic-bezier(.2,.7,.3,1)}
-.pcard .foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.pbar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--gold);border-radius:1px;text-decoration:none}
+
+/* ขวา: ผลจริง + ส่วนต่างจากเส้นเป้า */
+.pc-rail{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:62px;padding-top:6px}
+.pc-num{
+  font-family:var(--mono);font-size:clamp(23px,2.1vw,29px);font-weight:600;line-height:.95;
+  color:var(--ink);letter-spacing:-.01em
+}
+.pc-unit{font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.pc-delta{font-family:var(--mono);font-size:11.5px;font-weight:600;margin-top:2px}
+.pc-delta.ahead{color:var(--ahead)}
+.pc-delta.behind{color:var(--behind)}
+
 .tag-none{display:inline-block;font-size:11.5px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:2px 8px}
 
 /* charts */
@@ -164,10 +202,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-bet
 footer img{height:28px;opacity:.75}
 
 @media (max-width:980px){
-  .grid{grid-template-columns:repeat(2,1fr)}
   .split{grid-template-columns:1fr}
   .topnav{display:none}
   .brand .sub{display:none}
+  .pcard{grid-template-columns:62px minmax(0,1fr) auto;gap:10px;padding:14px 14px 12px}
+  .pc-left{min-width:58px}
+  .pc-ring{width:58px;height:58px}
+  .pc-ring-in{width:44px;height:44px;font-size:12px}
+  .pc-num{font-size:23px}
 }
 @media (max-width:560px){
   .grid{grid-template-columns:1fr}
@@ -477,32 +519,58 @@ function paintHero(){
 
 function paintCards(){
   const wk = WEEKLY.length ? WEEKLY[WEEKLY.length - 1] : null;
-  document.getElementById('project-grid').innerHTML = PROJECTS.map((p, i) => {
-    const a = actualBy[p.id], pct = p.target ? Math.min(100, a / p.target * 100) : 0;
-    const last = wk ? (wk.v?.[p.id] || 0) : 0;
-    const L = p[LANG];
-    return `<article class="card pcard">
-      <div class="accent" style="background:${p.color}"></div>
-      <div class="body">
-        <div class="head">
-          <span class="idx" style="background:${p.color}">${i + 1}</span>
-          <span class="name">${L.name}</span>
+  const pacePct = Math.min(100, daysElapsed / totalDays * 100);
+  const maxActual = Math.max(...PROJECTS.map(p => actualBy[p.id]), 1);
+
+  /* เรียงตามความคืบหน้า (% ของเป้า) — โครงการที่ยังไม่ตั้งเป้าใช้สัดส่วนเทียบผลจริงสูงสุดแทน
+     การ sort ของ JS เป็นแบบ stable ตอนยังไม่มีข้อมูลทุกค่าเท่ากัน จึงคงลำดับ 1–7 ตามเดิม */
+  const score = p => p.target ? actualBy[p.id] / p.target : actualBy[p.id] / maxActual;
+
+  document.getElementById('project-grid').innerHTML = PROJECTS
+    .map((p, i) => ({ p, no: i + 1 }))
+    .sort((a, b) => score(b.p) - score(a.p))
+    .map(({ p, no }) => {
+      const a = actualBy[p.id];
+      const pct = p.target ? Math.min(100, a / p.target * 100) : 0;
+      const last = wk ? (wk.v?.[p.id] || 0) : 0;
+      const L = p[LANG];
+
+      /* ส่วนต่างจากเส้นเป้าเฉพาะโครงการ ณ วันที่ asOf */
+      const delta = p.target ? a - p.target * daysElapsed / totalDays : 0;
+      const showDelta = wk && p.target;
+      const deltaTxt = showDelta
+        ? `<span class="pc-delta ${delta >= 0 ? 'ahead' : 'behind'}">${delta >= 0 ? '+' : '−'}${nf(Math.abs(delta))}</span>`
+        : '';
+
+      const meta = p.target
+        ? (LANG === 'th'
+            ? `เป้า ${nf(p.target)}${wk ? ` · สัปดาห์ล่าสุด +${nf(last)}` : ''}`
+            : `target ${nf(p.target)}${wk ? ` · latest week +${nf(last)}` : ''}`)
+        : `<span class="tag-none">${LANG === 'th' ? 'ยังไม่กำหนดเป้า' : 'no target set'}</span>`;
+
+      return `<article class="card pcard">
+        <div class="pc-left">
+          <span class="pc-idx" style="background:${p.color}">${no}</span>
+          <div class="pc-ring${p.target ? '' : ' none'}" style="--c:${p.color};--pct:${pct.toFixed(1)}">
+            <span class="pc-ring-in">${p.target ? Math.round(pct) + '%' : '—'}</span>
+          </div>
         </div>
-        <p class="desc">${L.desc}</p>
-        <div class="figs">
-          <span class="act">${nf(a)}</span>
-          <span class="tgt">${p.target
-            ? (LANG === 'th' ? `จากเป้า ${nf(p.target)} คน` : `of ${nf(p.target)}`)
-            : `<span class="tag-none">${LANG === 'th' ? 'ยังไม่กำหนดเป้า' : 'no target set'}</span>`}</span>
+        <div class="pc-main">
+          <p class="pc-name" title="${L.name}">${L.name}</p>
+          <p class="pc-desc" title="${L.desc}">${L.desc}</p>
+          <p class="pc-meta">${meta}</p>
+          ${p.target ? `<div class="pbar">
+            <i style="width:${pct.toFixed(2)}%;background:${p.color}"></i>
+            <u style="left:${pacePct.toFixed(2)}%" title="${LANG === 'th' ? 'เส้นเป้า ณ วันนี้' : 'target pace today'}"></u>
+          </div>` : ''}
         </div>
-        ${p.target ? `<div class="pbar"><i style="width:${pct}%;background:${p.color}"></i></div>` : ''}
-        <div class="foot">
-          <span>${p.target ? pct.toFixed(1) + '%' : '—'}</span>
-          <span>${wk ? (LANG === 'th' ? 'สัปดาห์ล่าสุด +' : 'this week +') + nf(last) : '—'}</span>
+        <div class="pc-rail">
+          <span class="pc-num">${nf(a)}</span>
+          <span class="pc-unit">${LANG === 'th' ? 'คน' : 'members'}</span>
+          ${deltaTxt}
         </div>
-      </div>
-    </article>`;
-  }).join('');
+      </article>`;
+    }).join('');
 }
 
 function paintBars(){
