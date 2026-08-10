@@ -84,6 +84,10 @@ body{
 .stat .v{font-family:var(--mono);font-size:23px;font-weight:600;color:var(--ink)}
 .stat .v.sig-behind{color:#B4443F}
 .stat .v.sig-ahead{color:var(--ahead)}
+/* ยอดยกมาจากครึ่งปีแรก — รวมอยู่ในยอดสะสมแล้ว คั่นเส้นไว้เพื่อแสดงเป็นที่มาของตัวเลข */
+.stat.carry{min-width:auto;padding-left:26px;border-left:1px solid var(--line)}
+.stat.carry .v{color:var(--ink-soft)}
+.stat .note{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.35}
 
 /* signature: pace rail */
 .rail{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 24px 18px}
@@ -188,7 +192,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th,td{padding:11px 13px;text-align:right;border-bottom:1px solid var(--line-soft);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
-thead th{font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted);background:var(--paper-2);position:sticky;top:74px}
+/* sticky อ้างอิงกับกล่อง .tablescroll (ซึ่งเป็น scroll container) ไม่ใช่หน้าจอ
+   จึงต้องเป็น top:0 ถ้าใส่ค่าอื่นส่วนหัวจะถูกดันลงไปทับแถวแรก */
+thead th{font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted);background:var(--paper-2);position:sticky;top:0}
 tbody td{font-family:var(--mono);color:var(--text)}
 tbody td:first-child{font-family:var(--body)}
 tbody tr:hover{background:#FBF7EE}
@@ -215,7 +221,6 @@ footer img{height:28px;opacity:.75}
 @media (max-width:560px){
   .grid{grid-template-columns:1fr}
   .headline{gap:20px 30px}
-  thead th{top:0}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important}
@@ -271,6 +276,11 @@ footer img{height:28px;opacity:.75}
       <div class="stat">
         <div class="label" data-i18n="l_need">ต้องได้เฉลี่ย/สัปดาห์</div>
         <div class="v" id="h-need">0</div>
+      </div>
+      <div class="stat carry">
+        <div class="label" data-i18n="l_carry">ยอดยกมา</div>
+        <div class="v" id="h-carry">0</div>
+        <div class="note" id="n-carry"></div>
       </div>
     </div>
 
@@ -384,7 +394,11 @@ const CONFIG = {
   totalTarget: 146000,
   startDate: '2026-07-01',
   endDate:   '2026-12-31',
-  asOf:      '2026-08-05'   // วันที่ของข้อมูลล่าสุด
+  asOf:      '2026-08-09',  // วันที่ของข้อมูลล่าสุด
+
+  /* ยอดสมาชิกใหม่ครึ่งปีแรก ยกมาเป็นฐานตั้งต้น — นับรวมในยอดสะสมและในเป้า 146,000
+     เส้นเป้าหมายจึงเริ่มจากตัวเลขนี้ ไม่ได้เริ่มจากศูนย์ */
+  carryOver: { value:46223, from:'2026-01-01', to:'2026-06-30' }
 };
 
 const PROJECTS = [
@@ -419,6 +433,12 @@ const PROJECTS = [
    { week:1, end:'2026-07-05', v:{p1:120, p2:340, p3:0, p4:610, p5:0, p6:880, p7:150, p8:0} },
 */
 const WEEKLY = [
+  { week:1, end:'2026-07-05', v:{p1:0,   p2:173, p3:0, p4:0, p5:9,   p6:786,  p7:0, p8:73}  },
+  { week:2, end:'2026-07-12', v:{p1:1,   p2:441, p3:0, p4:0, p5:14,  p6:1316, p7:0, p8:62}  },
+  { week:3, end:'2026-07-19', v:{p1:181, p2:206, p3:0, p4:0, p5:143, p6:1407, p7:0, p8:64}  },
+  { week:4, end:'2026-07-26', v:{p1:62,  p2:348, p3:0, p4:0, p5:23,  p6:1369, p7:0, p8:105} },
+  { week:5, end:'2026-08-02', v:{p1:2,   p2:116, p3:0, p4:0, p5:341, p6:950,  p7:0, p8:36}  },
+  { week:6, end:'2026-08-09', v:{p1:1,   p2:320, p3:0, p4:0, p5:81,  p6:787,  p7:0, p8:40}  },
 ];
 
 /* ============================================================= */
@@ -428,7 +448,7 @@ const I18N = {
       nav1:'7 โครงการ + อื่นๆ',nav2:'เทียบเป้าหมาย',nav3:'แนวโน้มสะสม',nav4:'ข้อมูลรายสัปดาห์',
       eyebrow:'National Savings Fund · Member Drive',title:'แผนงานขับเคลื่อนสมาชิกใหม่',
       period:'กรกฎาคม – ธันวาคม 2569 · 7 โครงการ · เป้าหมายรวมไม่น้อยกว่า 146,000 คน',
-      l_actual:'สมาชิกใหม่สะสม',l_pct:'คิดเป็น',l_pace:'ควรทำได้ถึงวันนี้',l_gap:'ห่างจากเส้นเป้า',l_need:'ต้องได้เฉลี่ย/สัปดาห์',
+      l_actual:'สมาชิกใหม่สะสม',l_pct:'คิดเป็น',l_pace:'ควรทำได้ถึงวันนี้',l_gap:'ห่างจากเส้นเป้า',l_need:'ต้องได้เฉลี่ย/สัปดาห์',l_carry:'ยอดยกมา',
       railtitle:'เส้นทางสู่ 146,000 คน',s_channel:'แบ่งตามช่องทาง',
       s_channel_hint:'ตามที่ระบุในแผนงาน — รอยืนยันการจับคู่กับโครงการที่ 1–7',
       c_main:'ช่องทางดำเนินการหลัก',c_more:'คน ขึ้นไป',c_people:'คน',
@@ -442,7 +462,7 @@ const I18N = {
       nav1:'7 programs + other',nav2:'vs target',nav3:'Cumulative',nav4:'Weekly data',
       eyebrow:'National Savings Fund · Member Drive',title:'New Member Drive',
       period:'July – December 2026 · 7 programs · at least 146,000 new members',
-      l_actual:'New members to date',l_pct:'of target',l_pace:'Expected by today',l_gap:'Gap to pace',l_need:'Needed per week',
+      l_actual:'New members to date',l_pct:'of target',l_pace:'Expected by today',l_gap:'Gap to pace',l_need:'Needed per week',l_carry:'Carried over',
       railtitle:'Road to 146,000',s_channel:'By channel',
       s_channel_hint:'As stated in the plan — mapping to programs 1–7 to be confirmed',
       c_main:'Core operating channels',c_more:'or more',c_people:'people',
@@ -475,13 +495,19 @@ const sumTargets = PROJECTS.reduce((a,p) => a + (p.target || 0), 0);
 const actualBy = {};
 PROJECTS.forEach(p => actualBy[p.id] = WEEKLY.reduce((a,w) => a + (w.v?.[p.id] || 0), 0));
 const actualTotal = Object.values(actualBy).reduce((a,b) => a + b, 0);
-const paceNow = CONFIG.totalTarget * daysElapsed / totalDays;
-const gap = actualTotal - paceNow;
+
+/* ยอดยกมาเป็นฐานตั้งต้นของเป้า 146,000 — ส่วนที่แผน ก.ค.–ธ.ค. ต้องหาเพิ่มคือ remainTarget
+   เส้นเป้าจึงวิ่งจาก CARRY (1 ก.ค.) ไป 146,000 (31 ธ.ค.) ไม่ใช่จากศูนย์ */
+const CARRY = CONFIG.carryOver?.value || 0;
+const cumTotal = CARRY + actualTotal;
+const remainTarget = Math.max(0, CONFIG.totalTarget - CARRY);
+const paceNow = CARRY + remainTarget * daysElapsed / totalDays;
+const gap = cumTotal - paceNow;
 
 function paintHero(){
-  document.getElementById('h-actual').firstChild.nodeValue = nf(actualTotal);
+  document.getElementById('h-actual').firstChild.nodeValue = nf(cumTotal);
   document.getElementById('h-target').textContent = '/ ' + nf(CONFIG.totalTarget);
-  document.getElementById('h-pct').textContent = (actualTotal / CONFIG.totalTarget * 100).toFixed(1) + '%';
+  document.getElementById('h-pct').textContent = (cumTotal / CONFIG.totalTarget * 100).toFixed(1) + '%';
   document.getElementById('h-pace').textContent = nf(paceNow);
 
   const gapEl = document.getElementById('h-gap');
@@ -490,9 +516,15 @@ function paintHero(){
          gapEl.className = 'v ' + (gap >= 0 ? 'sig-ahead' : 'sig-behind'); }
 
   document.getElementById('h-need').textContent =
-    nf(Math.max(0, CONFIG.totalTarget - actualTotal) / weeksLeft);
+    nf(Math.max(0, CONFIG.totalTarget - cumTotal) / weeksLeft);
 
-  const pct = Math.min(100, actualTotal / CONFIG.totalTarget * 100);
+  const co = CONFIG.carryOver;
+  document.getElementById('h-carry').textContent = nf(co.value);
+  document.getElementById('n-carry').textContent = LANG === 'th'
+    ? `${fmtDate(co.from)} – ${fmtDate(co.to)} · รวมในยอดสะสมแล้ว`
+    : `${fmtDate(co.from)} – ${fmtDate(co.to)} · included above`;
+
+  const pct = Math.min(100, cumTotal / CONFIG.totalTarget * 100);
   const todayPct = Math.min(100, daysElapsed / totalDays * 100);
   requestAnimationFrame(() => {
     document.getElementById('rail-fill').style.width = pct + '%';
@@ -507,11 +539,11 @@ function paintHero(){
 
   document.getElementById('rail-note').innerHTML = WEEKLY.length
     ? (LANG === 'th'
-        ? `ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> ผลจริง <b>${nf(actualTotal)} คน</b> — ${gap >= 0 ? 'เร็วกว่าแผน' : 'ช้ากว่าแผน'} <b>${nf(Math.abs(gap))} คน</b>`
-        : `As of ${fmtDate(CONFIG.asOf)} the pace line sits at <b>${nf(paceNow)}</b>; actual is <b>${nf(actualTotal)}</b> — ${gap >= 0 ? 'ahead by' : 'behind by'} <b>${nf(Math.abs(gap))}</b>`)
+        ? `ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> ผลจริง <b>${nf(cumTotal)} คน</b> (ยกมา ${nf(CARRY)} + ครึ่งปีหลัง ${nf(actualTotal)}) — ${gap >= 0 ? 'เร็วกว่าแผน' : 'ช้ากว่าแผน'} <b>${nf(Math.abs(gap))} คน</b>`
+        : `As of ${fmtDate(CONFIG.asOf)} the pace line sits at <b>${nf(paceNow)}</b>; actual is <b>${nf(cumTotal)}</b> (${nf(CARRY)} carried over + ${nf(actualTotal)} this period) — ${gap >= 0 ? 'ahead by' : 'behind by'} <b>${nf(Math.abs(gap))}</b>`)
     : (LANG === 'th'
-        ? `ยังไม่มีข้อมูลผลจริง — ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> เติมตัวเลขสัปดาห์แรกแล้วทุกกราฟจะขยับตาม`
-        : `No actuals yet — the pace line is at <b>${nf(paceNow)}</b> as of ${fmtDate(CONFIG.asOf)}. Add the first week and every chart follows.`);
+        ? `ยังไม่มีข้อมูลครึ่งปีหลัง — เริ่มจากยอดยกมา <b>${nf(CARRY)} คน</b> ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> เติมตัวเลขสัปดาห์แรกแล้วทุกกราฟจะขยับตาม`
+        : `No actuals yet for this period — starting from <b>${nf(CARRY)}</b> carried over; the pace line is at <b>${nf(paceNow)}</b> as of ${fmtDate(CONFIG.asOf)}. Add the first week and every chart follows.`);
 
   document.getElementById('f-updated').textContent =
     (LANG === 'th' ? 'ข้อมูล ณ ' : 'Data as of ') + fmtDate(CONFIG.asOf);
@@ -524,15 +556,10 @@ function paintHero(){
 function paintCards(){
   const wk = WEEKLY.length ? WEEKLY[WEEKLY.length - 1] : null;
   const pacePct = Math.min(100, daysElapsed / totalDays * 100);
-  const maxActual = Math.max(...PROJECTS.map(p => actualBy[p.id]), 1);
 
-  /* เรียงตามความคืบหน้า (% ของเป้า) — โครงการที่ยังไม่ตั้งเป้าใช้สัดส่วนเทียบผลจริงสูงสุดแทน
-     การ sort ของ JS เป็นแบบ stable ตอนยังไม่มีข้อมูลทุกค่าเท่ากัน จึงคงลำดับ 1–7 ตามเดิม */
-  const score = p => p.target ? actualBy[p.id] / p.target : actualBy[p.id] / maxActual;
-
+  /* แสดงเรียงตามลำดับโครงการ 1–8 ตามที่ประกาศไว้ใน PROJECTS ไม่จัดอันดับตามความคืบหน้า */
   document.getElementById('project-grid').innerHTML = PROJECTS
     .map((p, i) => ({ p, no: i + 1 }))
-    .sort((a, b) => score(b.p) - score(a.p))
     .map(({ p, no }) => {
       const a = actualBy[p.id];
       const pct = p.target ? Math.min(100, a / p.target * 100) : 0;
@@ -611,12 +638,15 @@ function paintTrend(){
     if (m) grid += `<line class="gl" x1="${x(f)}" y1="${padT}" x2="${x(f)}" y2="${H - padB}" stroke-dasharray="3 4"></line>`;
   }
 
-  const pace = `<line x1="${x(0)}" y1="${y(0)}" x2="${x(1)}" y2="${y(CONFIG.totalTarget)}"
-      stroke="var(--gold)" stroke-width="2.5" stroke-dasharray="7 5"></line>`;
+  /* เส้นเป้าและเส้นผลจริงเริ่มที่ยอดยกมา ไม่ใช่ศูนย์ */
+  const pace = `<line x1="${x(0)}" y1="${y(CARRY)}" x2="${x(1)}" y2="${y(CONFIG.totalTarget)}"
+      stroke="var(--gold)" stroke-width="2.5" stroke-dasharray="7 5"></line>
+    <circle cx="${x(0)}" cy="${y(CARRY)}" r="3.5" fill="var(--gold)"></circle>
+    <text class="axis" x="${x(0) + 9}" y="${y(CARRY) - 9}">${LANG === 'th' ? 'ยอดยกมา ' : 'carried over '}${nf(CARRY)}</text>`;
 
-  let actual = '', dots = '', run = 0;
+  let actual = '', dots = '', run = CARRY;
   if (WEEKLY.length){
-    const pts = [[x(0), y(0)]];
+    const pts = [[x(0), y(CARRY)]];
     WEEKLY.forEach(w => {
       run += PROJECTS.reduce((a, p) => a + (w.v?.[p.id] || 0), 0);
       const f = (d(w.end) - START) / DAY / (totalDays - 1);
@@ -650,7 +680,7 @@ function paintTable(){
     </div>`;
     return;
   }
-  const head = PROJECTS.map((p, i) => `<th title="${p[LANG].name}">${i + 1}</th>`).join('');
+  const head = PROJECTS.map((p, i) => `<th title="${p[LANG].name}">P${i + 1}</th>`).join('');
   const rows = WEEKLY.map(w => {
     const tot = PROJECTS.reduce((a, p) => a + (w.v?.[p.id] || 0), 0);
     return `<tr><td>${LANG === 'th' ? 'สัปดาห์ที่ ' : 'Week '}${w.week} · ${fmtDate(w.end)}</td>
