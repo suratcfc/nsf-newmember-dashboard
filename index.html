@@ -35,6 +35,7 @@
   --p5:#16897F;
   --p6:#D93465;
   --p7:#17427E;
+  --p8:#C2681C;
 
   --display:'Kanit',system-ui,sans-serif;
   --body:'Kanit',system-ui,sans-serif;
@@ -231,7 +232,7 @@ footer img{height:28px;opacity:.75}
       <span class="sub" data-i18n-html="brandsub">แผนขับเคลื่อนสมาชิกใหม่<span>กรกฎาคม – ธันวาคม 2569</span></span>
     </a>
     <nav class="topnav">
-      <a href="#projects" data-i18n="nav1">7 โครงการ</a>
+      <a href="#projects" data-i18n="nav1">7 โครงการ + อื่นๆ</a>
       <a href="#compare" data-i18n="nav2">เทียบเป้าหมาย</a>
       <a href="#trend" data-i18n="nav3">แนวโน้มสะสม</a>
       <a href="#weekly" data-i18n="nav4">ข้อมูลรายสัปดาห์</a>
@@ -319,7 +320,7 @@ footer img{height:28px;opacity:.75}
 
   <section id="projects">
     <div class="sec-head">
-      <h2 data-i18n="s_proj">7 โครงการ</h2>
+      <h2 data-i18n="s_proj">7 โครงการ และช่องทางอื่นๆ</h2>
       <span class="hint" id="proj-hint"></span>
     </div>
     <div class="sec-rule"></div>
@@ -407,12 +408,15 @@ const PROJECTS = [
     en:{name:'Online sign-ups', desc:'Growth through digital channels'} },
   { id:'p7', target:29000, color:'#17427E',
     th:{name:'กอช. ร่วมมือกับประชาชน', desc:'กองทุนหมู่บ้าน · สถาบันการเงินชุมชน'},
-    en:{name:'Community partnerships', desc:'Village funds and community finance institutions'} }
+    en:{name:'Community partnerships', desc:'Village funds and community finance institutions'} },
+  { id:'p8', target:null, color:'#C2681C',
+    th:{name:'ช่องทางอื่นๆ', desc:'สมัครผ่านช่องทางที่ไม่อยู่ในโครงการที่ 1–7', note:'ไม่กำหนดเป้าตายตัว'},
+    en:{name:'Other channels', desc:'Sign-ups outside programs 1–7', note:'no fixed target'} }
 ];
 
 /* WEEKLY — เพิ่มหนึ่งบรรทัดต่อหนึ่งสัปดาห์ ตัวเลข = จำนวนที่ "เพิ่มขึ้น" ในสัปดาห์นั้น
    ตัวอย่างรูปแบบ:
-   { week:1, end:'2026-07-05', v:{p1:120, p2:340, p3:0, p4:610, p5:0, p6:880, p7:150} },
+   { week:1, end:'2026-07-05', v:{p1:120, p2:340, p3:0, p4:610, p5:0, p6:880, p7:150, p8:0} },
 */
 const WEEKLY = [
 ];
@@ -421,7 +425,7 @@ const WEEKLY = [
 
 const I18N = {
   th:{brandsub:'แผนขับเคลื่อนสมาชิกใหม่<span>กรกฎาคม – ธันวาคม 2569</span>',
-      nav1:'7 โครงการ',nav2:'เทียบเป้าหมาย',nav3:'แนวโน้มสะสม',nav4:'ข้อมูลรายสัปดาห์',
+      nav1:'7 โครงการ + อื่นๆ',nav2:'เทียบเป้าหมาย',nav3:'แนวโน้มสะสม',nav4:'ข้อมูลรายสัปดาห์',
       eyebrow:'National Savings Fund · Member Drive',title:'แผนงานขับเคลื่อนสมาชิกใหม่',
       period:'กรกฎาคม – ธันวาคม 2569 · 7 โครงการ · เป้าหมายรวมไม่น้อยกว่า 146,000 คน',
       l_actual:'สมาชิกใหม่สะสม',l_pct:'คิดเป็น',l_pace:'ควรทำได้ถึงวันนี้',l_gap:'ห่างจากเส้นเป้า',l_need:'ต้องได้เฉลี่ย/สัปดาห์',
@@ -429,13 +433,13 @@ const I18N = {
       s_channel_hint:'ตามที่ระบุในแผนงาน — รอยืนยันการจับคู่กับโครงการที่ 1–7',
       c_main:'ช่องทางดำเนินการหลัก',c_more:'คน ขึ้นไป',c_people:'คน',
       c_main_d:'เครือข่ายพื้นที่ สถานศึกษา หน่วยงานความร่วมมือ และการชวนต่อจากสมาชิกเดิม',
-      c_wallet_d:'ช่องทางพันธมิตรดิจิทัล',s_proj:'7 โครงการ',s_compare:'ผลจริงเทียบเป้าหมาย รายโครงการ',
+      c_wallet_d:'ช่องทางพันธมิตรดิจิทัล',s_proj:'7 โครงการ และช่องทางอื่นๆ',s_compare:'ผลจริงเทียบเป้าหมาย รายโครงการ',
       lg_actual:'ผลจริงสะสม',lg_target:'เป้าหมายทั้งแผน',s_trend:'สมาชิกใหม่สะสมรายสัปดาห์',
       s_trend_hint:'เทียบกับเส้นเป้าหมายแบบเฉลี่ยตลอดช่วงแผน',lg_cum:'ผลจริงสะสม',lg_pace:'เส้นเป้าหมาย',
       s_weekly:'ข้อมูลรายสัปดาห์',s_weekly_hint:'จำนวนสมาชิกใหม่ที่เพิ่มขึ้นในแต่ละสัปดาห์',
       f_src:'ที่มาข้อมูลเป้าหมาย: แผนงานขับเคลื่อนสมาชิกใหม่ กรกฎาคม – ธันวาคม 2569 · กองทุนการออมแห่งชาติ'},
   en:{brandsub:'New Member Drive<span>July – December 2026</span>',
-      nav1:'7 programs',nav2:'vs target',nav3:'Cumulative',nav4:'Weekly data',
+      nav1:'7 programs + other',nav2:'vs target',nav3:'Cumulative',nav4:'Weekly data',
       eyebrow:'National Savings Fund · Member Drive',title:'New Member Drive',
       period:'July – December 2026 · 7 programs · at least 146,000 new members',
       l_actual:'New members to date',l_pct:'of target',l_pace:'Expected by today',l_gap:'Gap to pace',l_need:'Needed per week',
@@ -443,7 +447,7 @@ const I18N = {
       s_channel_hint:'As stated in the plan — mapping to programs 1–7 to be confirmed',
       c_main:'Core operating channels',c_more:'or more',c_people:'people',
       c_main_d:'Local networks, schools, partner agencies and member referrals',
-      c_wallet_d:'Digital partner channels',s_proj:'The 7 programs',s_compare:'Actual vs target by program',
+      c_wallet_d:'Digital partner channels',s_proj:'The 7 programs and other channels',s_compare:'Actual vs target by program',
       lg_actual:'Actual to date',lg_target:'Full-plan target',s_trend:'Cumulative new members by week',
       s_trend_hint:'Against a straight-line target across the plan period',lg_cum:'Actual',lg_pace:'Target pace',
       s_weekly:'Weekly data',s_weekly_hint:'New members added each week',
@@ -546,7 +550,7 @@ function paintCards(){
         ? (LANG === 'th'
             ? `เป้า ${nf(p.target)}${wk ? ` · สัปดาห์ล่าสุด +${nf(last)}` : ''}`
             : `target ${nf(p.target)}${wk ? ` · latest week +${nf(last)}` : ''}`)
-        : `<span class="tag-none">${LANG === 'th' ? 'ยังไม่กำหนดเป้า' : 'no target set'}</span>`;
+        : `<span class="tag-none">${L.note || (LANG === 'th' ? 'ยังไม่กำหนดเป้า' : 'no target set')}</span>`;
 
       return `<article class="card pcard">
         <div class="pc-left">
