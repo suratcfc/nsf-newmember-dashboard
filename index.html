@@ -394,7 +394,9 @@ const CONFIG = {
   totalTarget: 146000,
   startDate: '2026-07-01',
   endDate:   '2026-12-31',
-  asOf:      '2026-08-09',  // วันที่ของข้อมูลล่าสุด
+  asOf:      '2026-08-23',  // วันที่ของยอดรวมล่าสุด
+  detailAsOf:'2026-08-09',  // วันที่ของข้อมูลแยกรายโครงการล่าสุด
+  latestTotal: 59762,       // ยอดรวมสมาชิกใหม่ล่าสุดจาก dashboard.nsf.or.th
 
   /* ยอดสมาชิกใหม่ครึ่งปีแรก ยกมาเป็นฐานตั้งต้น — นับรวมในยอดสะสมและในเป้า 146,000
      เส้นเป้าหมายจึงเริ่มจากตัวเลขนี้ ไม่ได้เริ่มจากศูนย์ */
@@ -457,7 +459,7 @@ const I18N = {
       lg_actual:'ผลจริงสะสม',lg_target:'เป้าหมายทั้งแผน',s_trend:'สมาชิกใหม่สะสมรายสัปดาห์',
       s_trend_hint:'เทียบกับเส้นเป้าหมายแบบเฉลี่ยตลอดช่วงแผน',lg_cum:'ผลจริงสะสม',lg_pace:'เส้นเป้าหมาย',
       s_weekly:'ข้อมูลรายสัปดาห์',s_weekly_hint:'จำนวนสมาชิกใหม่ที่เพิ่มขึ้นในแต่ละสัปดาห์',
-      f_src:'ที่มาข้อมูลเป้าหมาย: แผนงานขับเคลื่อนสมาชิกใหม่ กรกฎาคม – ธันวาคม 2569 · กองทุนการออมแห่งชาติ'},
+      f_src:'ที่มาข้อมูลเป้าหมาย: แผนงานขับเคลื่อนสมาชิกใหม่ กรกฎาคม – ธันวาคม 2569 · ยอดรวมล่าสุด: dashboard.nsf.or.th · รายละเอียดรายโครงการ: Tableau รายงาน 92'},
   en:{brandsub:'New Member Drive<span>July – December 2026</span>',
       nav1:'7 programs + other',nav2:'vs target',nav3:'Cumulative',nav4:'Weekly data',
       eyebrow:'National Savings Fund · Member Drive',title:'New Member Drive',
@@ -471,7 +473,7 @@ const I18N = {
       lg_actual:'Actual to date',lg_target:'Full-plan target',s_trend:'Cumulative new members by week',
       s_trend_hint:'Against a straight-line target across the plan period',lg_cum:'Actual',lg_pace:'Target pace',
       s_weekly:'Weekly data',s_weekly_hint:'New members added each week',
-      f_src:'Targets from the July–December 2026 New Member Drive plan · National Savings Fund'}
+      f_src:'Targets from the July–December 2026 New Member Drive plan · latest total: dashboard.nsf.or.th · program detail: Tableau report 92'}
 };
 
 let LANG = 'th';
@@ -499,7 +501,9 @@ const actualTotal = Object.values(actualBy).reduce((a,b) => a + b, 0);
 /* ยอดยกมาเป็นฐานตั้งต้นของเป้า 146,000 — ส่วนที่แผน ก.ค.–ธ.ค. ต้องหาเพิ่มคือ remainTarget
    เส้นเป้าจึงวิ่งจาก CARRY (1 ก.ค.) ไป 146,000 (31 ธ.ค.) ไม่ใช่จากศูนย์ */
 const CARRY = CONFIG.carryOver?.value || 0;
-const cumTotal = CARRY + actualTotal;
+const detailedCumTotal = CARRY + actualTotal;
+const cumTotal = Math.max(detailedCumTotal, CONFIG.latestTotal || 0);
+const UNALLOCATED = Math.max(0, cumTotal - detailedCumTotal);
 const remainTarget = Math.max(0, CONFIG.totalTarget - CARRY);
 const paceNow = CARRY + remainTarget * daysElapsed / totalDays;
 const gap = cumTotal - paceNow;
@@ -539,8 +543,8 @@ function paintHero(){
 
   document.getElementById('rail-note').innerHTML = WEEKLY.length
     ? (LANG === 'th'
-        ? `ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> ผลจริง <b>${nf(cumTotal)} คน</b> (ยกมา ${nf(CARRY)} + ครึ่งปีหลัง ${nf(actualTotal)}) — ${gap >= 0 ? 'เร็วกว่าแผน' : 'ช้ากว่าแผน'} <b>${nf(Math.abs(gap))} คน</b>`
-        : `As of ${fmtDate(CONFIG.asOf)} the pace line sits at <b>${nf(paceNow)}</b>; actual is <b>${nf(cumTotal)}</b> (${nf(CARRY)} carried over + ${nf(actualTotal)} this period) — ${gap >= 0 ? 'ahead by' : 'behind by'} <b>${nf(Math.abs(gap))}</b>`)
+        ? `ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> ผลจริง <b>${nf(cumTotal)} คน</b> (ยกมา ${nf(CARRY)} + แยกรายโครงการถึง ${fmtDate(CONFIG.detailAsOf)} ${nf(actualTotal)}${UNALLOCATED ? ` + รอจัดสรรรายโครงการ ${nf(UNALLOCATED)}` : ''}) — ${gap >= 0 ? 'เร็วกว่าแผน' : 'ช้ากว่าแผน'} <b>${nf(Math.abs(gap))} คน</b>`
+        : `As of ${fmtDate(CONFIG.asOf)} the pace line sits at <b>${nf(paceNow)}</b>; actual is <b>${nf(cumTotal)}</b> (${nf(CARRY)} carried over + ${nf(actualTotal)} allocated through ${fmtDate(CONFIG.detailAsOf)}${UNALLOCATED ? ` + ${nf(UNALLOCATED)} pending program allocation` : ''}) — ${gap >= 0 ? 'ahead by' : 'behind by'} <b>${nf(Math.abs(gap))}</b>`)
     : (LANG === 'th'
         ? `ยังไม่มีข้อมูลครึ่งปีหลัง — เริ่มจากยอดยกมา <b>${nf(CARRY)} คน</b> ถึง ${fmtDate(CONFIG.asOf)} เส้นเป้าหมายอยู่ที่ <b>${nf(paceNow)} คน</b> เติมตัวเลขสัปดาห์แรกแล้วทุกกราฟจะขยับตาม`
         : `No actuals yet for this period — starting from <b>${nf(CARRY)}</b> carried over; the pace line is at <b>${nf(paceNow)}</b> as of ${fmtDate(CONFIG.asOf)}. Add the first week and every chart follows.`);
@@ -549,8 +553,8 @@ function paintHero(){
     (LANG === 'th' ? 'ข้อมูล ณ ' : 'Data as of ') + fmtDate(CONFIG.asOf);
 
   document.getElementById('proj-hint').textContent = LANG === 'th'
-    ? `ผลรวมเป้าหมายรายโครงการ ${nf(sumTargets)} คน (สูงกว่าเป้ารวม ${nf(CONFIG.totalTarget)} คน)`
-    : `Program targets sum to ${nf(sumTargets)} against the ${nf(CONFIG.totalTarget)} headline`;
+    ? `ผลรวมเป้าหมายรายโครงการ ${nf(sumTargets)} คน (สูงกว่าเป้ารวม ${nf(CONFIG.totalTarget)} คน) · รายละเอียดผลจริงถึง ${fmtDate(CONFIG.detailAsOf)}`
+    : `Program targets sum to ${nf(sumTargets)} against the ${nf(CONFIG.totalTarget)} headline · actuals detailed through ${fmtDate(CONFIG.detailAsOf)}`;
 }
 
 function paintCards(){
@@ -652,6 +656,11 @@ function paintTrend(){
       const f = (d(w.end) - START) / DAY / (totalDays - 1);
       pts.push([x(Math.min(1, f)), y(run)]);
     });
+    if (UNALLOCATED > 0){
+      run += UNALLOCATED;
+      const fLatest = (ASOF - START) / DAY / (totalDays - 1);
+      pts.push([x(Math.min(1, fLatest)), y(run)]);
+    }
     actual = `<polyline fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"
       points="${pts.map(p => p.join(',')).join(' ')}"></polyline>`;
     dots = pts.slice(1).map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"></circle>`).join('');
@@ -687,12 +696,18 @@ function paintTable(){
       ${PROJECTS.map(p => `<td>${nf(w.v?.[p.id] || 0)}</td>`).join('')}
       <td><b>${nf(tot)}</b></td></tr>`;
   }).join('');
+  const pendingRow = UNALLOCATED ? `<tr>
+    <td>${LANG === 'th'
+      ? `ยอดเพิ่มหลัง ${fmtDate(CONFIG.detailAsOf)} ถึง ${fmtDate(CONFIG.asOf)} · รอจัดสรร P1–P8`
+      : `Added after ${fmtDate(CONFIG.detailAsOf)} through ${fmtDate(CONFIG.asOf)} · pending P1–P8 allocation`}</td>
+    ${PROJECTS.map(() => '<td>—</td>').join('')}
+    <td><b>${nf(UNALLOCATED)}</b></td></tr>` : '';
   wrap.innerHTML = `<table>
     <thead><tr><th>${LANG === 'th' ? 'สัปดาห์' : 'Week'}</th>${head}<th>${LANG === 'th' ? 'รวม' : 'Total'}</th></tr></thead>
-    <tbody>${rows}</tbody>
+    <tbody>${rows}${pendingRow}</tbody>
     <tfoot><tr><td>${LANG === 'th' ? 'สะสม' : 'Cumulative'}</td>
       ${PROJECTS.map(p => `<td>${nf(actualBy[p.id])}</td>`).join('')}
-      <td>${nf(actualTotal)}</td></tr></tfoot></table>`;
+      <td>${nf(actualTotal + UNALLOCATED)}</td></tr></tfoot></table>`;
 }
 
 function applyLang(){
